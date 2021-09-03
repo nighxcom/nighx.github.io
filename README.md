@@ -1,1 +1,1 @@
-# nighx.github.io
+# github.io
