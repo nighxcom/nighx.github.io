@@ -1,3 +1,125 @@
-<html>
-	<title>happy</title>
+<!DOCTYPE html>
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<canvas id="tutorial" width="500" height="500" style="border:1px solid"></canvas>
+
+<br>坐标数组:
+<input id="dotArray" type="text" name="firstname">
+<input type="button" value="绘制" onclick="drawAction()">
+<input type="button" value="随机" onclick="randomAction()">
+
+
+<script type="text/javascript">
+    const base = [50, 450];
+    const size = [500, 500];
+    const step = 40;
+    const dotR = 5;
+    let ctx;
+
+    function init() {
+        let canvas = document.getElementById('tutorial');
+        if (!canvas.getContext) return;
+        ctx = canvas.getContext("2d");
+
+        ctx.setLineDash([2, 5]);
+        ctx.font = "20px sans-serif";
+
+        randomAction();
+    }
+
+    function randomAction() {
+        let dots = randomDots();
+
+        let dotArray = document.getElementById('dotArray');
+        dotArray.value = JSON.stringify(dots);
+
+        drawByData(dots);
+    }
+
+    function randomDots() {
+        let xArr = [];
+        while (xArr.length <= 10) {
+            xArr.push(xArr.length);
+        }
+        xArr.sort((a, b) => Math.random() - 0.5);
+        let size = Math.floor(Math.random() * 6) + 5;
+        let dots = [];
+        for (let i = 0; i < size; i++) {
+            dots.push([xArr[i], Math.floor(Math.random() * 11)]);
+        }
+        return dots;
+    }
+
+    function drawAction() {
+        let dotArray = document.getElementById('dotArray');
+        let line = dotArray.value;
+        if (!line || line == "") {
+            return;
+        }
+        try {
+            let dots = JSON.parse(dotArray.value || "");
+            drawByData(dots);
+        } catch (e) {
+
+        }
+    }
+
+    function drawByData(dots) {
+        ctx.clearRect(0, 0, size[0], size[1]);
+
+        drawCoord();
+
+        ctx.fillText(JSON.stringify(dots), base[0] + 5, size[1] - 10);
+
+        for (let i = 0; i < dots.length; i++) {
+            drawDot(dots[i][0], dots[i][1]);
+        }
+
+        // 互相连线
+        // for (let i = 0; i < dots.length - 1; i++) {
+        //     for (let j = i + 1; j < dots.length; j++) {
+        //         drawLine(dots[i][0], dots[i][1], dots[j][0], dots[j][1]);
+        //     }
+        // }
+        // 只与相邻四个点连线
+        dots.sort((a, b) => a[0] - b[0]);
+        drawLine(dots[0][0], dots[0][1], dots[1][0], dots[1][1]);
+        for (let i = 2; i < dots.length; i++) {
+            drawLine(dots[i - 1][0], dots[i - 1][1], dots[i][0], dots[i][1]);
+            drawLine(dots[i - 2][0], dots[i - 2][1], dots[i][0], dots[i][1]);
+        }
+    }
+
+    function drawCoord() {
+        ctx.fillRect(0, base[1] - 1, size[0], 2);
+        ctx.fillRect(base[0] - 1, 0, 2, size[1]);
+    }
+
+    function drawDot(x, y) {
+        let dot = getDotPos(x, y);
+        ctx.beginPath();
+        ctx.arc(dot.x, dot.y, dotR, 0, Math.PI * 2, false);
+        ctx.fill();
+    }
+
+    function drawLine(x1, y1, x2, y2) {
+        let dot1 = getDotPos(x1, y1);
+        let dot2 = getDotPos(x2, y2);
+        ctx.beginPath();
+        ctx.moveTo(dot1.x, dot1.y);
+        ctx.lineTo(dot2.x, dot2.y);
+        ctx.stroke();
+    }
+
+    function getDotPos(x, y) {
+        return {x: base[0] + step * x, y: base[1] - step * y};
+    }
+
+    init();
+
+</script>
+</body>
 </html>
